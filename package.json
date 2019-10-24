@@ -1,0 +1,21 @@
+{
+    "name": "lottie-web-editor",
+    "version": "0.0.1",
+    "description": "Utility functions for working with colors inside lottie JSON's. Written in vanilla JS so it's compatible with everything else.",
+    "author": {
+        "name": "Alexandru Pavaloi",
+        "email": "pava@iampava.com",
+        "url": "https://iampava.com"
+    },
+    "license": "MIT",
+    "main": "src/plugin.js",
+    "keywords": [
+        "lottie",
+        "lottie-web",
+        "after-effects"
+    ],
+    "repository": "https://github.com/iampava/lottie-web-editor.git",
+    "bugs": "https://github.com/iampava/lottie-web-editor/issues",
+    "homepage": "https://github.com/iampava/lottie-web-editor",
+    "dependencies": {}
+}
