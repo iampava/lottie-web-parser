@@ -1,7 +1,7 @@
 {
-    "name": "lottie-web-editor",
+    "name": "lottie-web-parser",
     "version": "0.0.1",
-    "description": "Utility functions for working with colors inside lottie JSON's. Written in vanilla JS so it's compatible with everything else.",
+    "description": "Utility functions for modifying color & text information from lottie-web JSONs.",
     "author": {
         "name": "Alexandru Pavaloi",
         "email": "pava@iampava.com",
@@ -14,8 +14,8 @@
         "lottie-web",
         "after-effects"
     ],
-    "repository": "https://github.com/iampava/lottie-web-editor.git",
-    "bugs": "https://github.com/iampava/lottie-web-editor/issues",
-    "homepage": "https://github.com/iampava/lottie-web-editor",
+    "repository": "https://github.com/iampava/lottie-web-parser.git",
+    "bugs": "https://github.com/iampava/lottie-web-parser/issues",
+    "homepage": "https://github.com/iampava/lottie-web-parser",
     "dependencies": {}
 }
