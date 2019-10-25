@@ -2,7 +2,7 @@
  * Convert a value from [0,255] ➡ [0,1] interval
  * @param {number} n
  */
-export function toUnitVector (n) {
+export function toUnitVector(n) {
   if (typeof n !== 'number') {
     throw new TypeError('Expecting a number value!')
   }
@@ -13,7 +13,7 @@ export function toUnitVector (n) {
  * Convert a value from [0,1] ➡ [0,255] interval
  * @param {number} n
  */
-export function fromUnitVector (n) {
+export function fromUnitVector(n) {
   if (typeof n !== 'number') {
     throw new TypeError('Expecting a number value!')
   }
@@ -25,7 +25,7 @@ export function fromUnitVector (n) {
  * @param {Object} object
  * @param {string} path
  */
-export function deepFind (object, path) {
+export function deepFind(object, path) {
   if (typeof path !== 'string') {
     throw new TypeError('Expecting "path" to be a string!')
   }
@@ -45,7 +45,7 @@ export function deepFind (object, path) {
  * In the example above, 'thisComp' is an instance of the Composition class
  */
 export class Composition {
-  constructor (animationData) {
+  constructor(animationData) {
     try {
       if (typeof animationData === 'string') {
         this.animationData = JSON.parse(animationData)
@@ -62,7 +62,7 @@ export class Composition {
    * If multiple layers have the same name, return the first one.
    * @param {number|string} indexOrName
    */
-  layer (indexOrName) {
+  layer(indexOrName) {
     if (!Array.isArray(this.animationData.layers)) {
       throw new TypeError('Expecting animationData to contain a "layers" property')
     }
@@ -119,7 +119,7 @@ export class Composition {
   }
 }
 
-export function findEffectFromJSCode (jsCode, json) {
+export function findEffectFromJSCode(jsCode, json) {
   const safeCode = `
     let thisComp = new Composition(json)
     let window = null;
@@ -132,7 +132,7 @@ export function findEffectFromJSCode (jsCode, json) {
   return Function('json', 'Composition', safeCode).bind(null)(json, Composition)
 }
 
-export function getNewColors (animationData, startingPath, existingColorPaths = [], isAsset = false) {
+export function getNewColors(animationData, startingPath, existingColorPaths = [], isAsset = false) {
   const result = []
   const layersOrShapes = deepFind(animationData, startingPath)
 
@@ -171,7 +171,11 @@ export function getNewColors (animationData, startingPath, existingColorPaths = 
           color = effect.v.k
         }
 
-        const [r, g, b] = color.slice(0, 3).map(c => fromUnitVector(c))
+        let [r, g, b] = color.slice(0, 3)
+        if (r <= 1 && g <= 1 && b <= 1) {
+          // Colors are in [0-1] interval
+          [r, g, b] = [r, g, b].map(c => fromUnitVector(c))
+        }
         const a = color[3]
 
         meta.rgba = [r, g, b, a]
