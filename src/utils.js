@@ -157,7 +157,7 @@ export function getNewColors(animationData, startingPath, existingColorPaths = [
 
         const meta = {
           name: shape.nm,
-          path: `${startingPath}.${layerIndex}.${outerShapeIndex}${outerShape.it ? `.${innerShapeIndex}` : ''}`,
+          path: `${startingPath}.${layerIndex}.shapes.${outerShapeIndex}${outerShape.it ? `.it.${innerShapeIndex}` : ''}`,
           isAsset
         }
 
