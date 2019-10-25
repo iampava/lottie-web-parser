@@ -26,9 +26,11 @@ function parseColors(json) {
 };
 
 function replaceColor(rgba, path, animationData) {
-  const newAnimationData = typeof animationData === 'string' ? JSON.parse(animationData) : JSON.parse(JSON.stringify(animationData))
+  if (typeof animationData !== 'object') {
+    throw new Error('Expecting a JSON-based format animation data');
+  }
   const [r, g, b, a] = [...rgba]
-  let target = newAnimationData
+  let target = animationData
 
   path.split('.').forEach((next) => {
     try {
@@ -40,13 +42,22 @@ function replaceColor(rgba, path, animationData) {
 
   if (target.v && target.v.k) {
     // Effect
-    target.v.k = [toUnitVector(r), toUnitVector(g), toUnitVector(b), a]
+    if (target.v.k.every(value => value <= 1)) {
+      target.v.k = [toUnitVector(r), toUnitVector(g), toUnitVector(b), a]
+    } else {
+      target.v.k = [r, g, b, a]
+    }
   } else if (target.c && target.c.k) {
     // Shape
-    target.c.k = [toUnitVector(r), toUnitVector(g), toUnitVector(b), a]
+    if (target.c.k.every(value => value <= 1)) {
+      target.c.k = [toUnitVector(r), toUnitVector(g), toUnitVector(b), a]
+    } else {
+      target.c.k = [r, g, b, a]
+    }
+
   }
 
-  return newAnimationData
+  return animationData
 }
 
 export default {
