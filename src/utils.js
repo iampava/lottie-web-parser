@@ -169,7 +169,7 @@ export function getNewColors(animationData, startingPath, existingColorPaths = [
 
           meta.name = effect.parentNm
           meta.path = effect.path
-          meta.color = '.v.k'
+          meta.colorValuePath = '.v.k'
           color = effect.v.k
         }
 
