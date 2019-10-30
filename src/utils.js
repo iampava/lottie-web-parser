@@ -160,7 +160,8 @@ export function getNewColors(animationData, startingPath, existingColorPaths = [
                         outerShape.it ? `.it.${innerShapeIndex}` : ''
                     }`,
                     colorValuePath: '.c.k',
-                    isAsset
+                    isAsset,
+                    type: shape.ty
                 };
 
                 let color = shape.c.k;
