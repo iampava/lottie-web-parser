@@ -3,10 +3,10 @@
  * @param {number} n
  */
 export function toUnitVector(n) {
-  if (typeof n !== 'number') {
-    throw new TypeError('Expecting a number value!')
-  }
-  return Math.round(n / 255 * 1000) / 1000
+    if (typeof n !== 'number') {
+        throw new TypeError('Expecting a number value!');
+    }
+    return Math.round((n / 255) * 1000) / 1000;
 }
 
 /**
@@ -14,10 +14,10 @@ export function toUnitVector(n) {
  * @param {number} n
  */
 export function fromUnitVector(n) {
-  if (typeof n !== 'number') {
-    throw new TypeError('Expecting a number value!')
-  }
-  return Math.round(n * 255)
+    if (typeof n !== 'number') {
+        throw new TypeError('Expecting a number value!');
+    }
+    return Math.round(n * 255);
 }
 
 /**
@@ -26,18 +26,18 @@ export function fromUnitVector(n) {
  * @param {string} path
  */
 export function deepFind(object, path) {
-  if (typeof path !== 'string') {
-    throw new TypeError('Expecting "path" to be a string!')
-  }
-
-  path.split('.').forEach((next) => {
-    try {
-      object = object[next]
-    } catch (err) {
-      object = null
+    if (typeof path !== 'string') {
+        throw new TypeError('Expecting "path" to be a string!');
     }
-  })
-  return object
+
+    path.split('.').forEach(next => {
+        try {
+            object = object[next];
+        } catch (err) {
+            object = null;
+        }
+    });
+    return object;
 }
 
 /**
@@ -45,154 +45,155 @@ export function deepFind(object, path) {
  * In the example above, 'thisComp' is an instance of the Composition class
  */
 export class Composition {
-  constructor(animationData) {
-    try {
-      if (typeof animationData === 'string') {
-        this.animationData = JSON.parse(animationData)
-      } else {
-        this.animationData = JSON.parse(JSON.stringify(animationData))
-      }
-    } catch (err) {
-      throw new TypeError('Expecting animationData to be a JSON object or a stringified JSON.')
-    }
-  }
-
-  /**
-   * Find an effect layer at a certain index or with a certain name.
-   * If multiple layers have the same name, return the first one.
-   * @param {number|string} indexOrName
-   */
-  layer(indexOrName) {
-    if (!Array.isArray(this.animationData.layers)) {
-      throw new TypeError('Expecting animationData to contain a "layers" property')
+    constructor(animationData) {
+        try {
+            if (typeof animationData === 'string') {
+                this.animationData = JSON.parse(animationData);
+            } else {
+                this.animationData = JSON.parse(JSON.stringify(animationData));
+            }
+        } catch (err) {
+            throw new TypeError('Expecting animationData to be a JSON object or a stringified JSON.');
+        }
     }
 
-    const effectLayers = this.animationData.layers.filter(l => l.hasOwnProperty('ef'))
-    let layer = null
-    let layerIndex
-
-    switch (typeof indexOrName) {
-      case 'number':
-        layer = effectLayers[indexOrName] || null
-        layerIndex = indexOrName
-        break
-      case 'string':
-        layerIndex = effectLayers.findIndex(l => l.nm === indexOrName)
-        layer = effectLayers[layerIndex] || null
-        break
-      default:
-        throw new TypeError('Expecting to get layer by <number>"index" or <string>"name". None of those supplied!')
-    }
-
-    return {
-
-      /** Find the first outer-effect on this layer with the specified name
-       *  @param {string} name
-       */
-      effect: (name) => {
-        if (!Array.isArray(layer.ef)) {
-          throw new TypeError(`The ${layer.nm} layer doesn't have effects`)
+    /**
+     * Find an effect layer at a certain index or with a certain name.
+     * If multiple layers have the same name, return the first one.
+     * @param {number|string} indexOrName
+     */
+    layer(indexOrName) {
+        if (!Array.isArray(this.animationData.layers)) {
+            throw new TypeError('Expecting animationData to contain a "layers" property');
         }
 
-        const outerEffectIndex = layer.ef.findIndex(ef => ef.nm === name)
-        const outerEffect = layer.ef[outerEffectIndex]
+        const effectLayers = this.animationData.layers.filter(l => l.hasOwnProperty('ef'));
+        let layer = null;
+        let layerIndex;
 
-        return (specificName) => {
-          if (!outerEffect) {
-            return null
-          }
-
-          if (!Array.isArray(outerEffect.ef)) {
-            throw new TypeError(`The ${outerEffect.name} effect doesn't have child-effects`)
-          }
-
-          const effectIndex = outerEffect.ef.findIndex(ef => ef.nm === specificName)
-
-          return {
-            ...outerEffect.ef[effectIndex],
-            parentNm: outerEffect.nm,
-            path: `layers.${layerIndex}.ef.${outerEffectIndex}.ef.${effectIndex}`
-          }
+        switch (typeof indexOrName) {
+            case 'number':
+                layer = effectLayers[indexOrName] || null;
+                layerIndex = indexOrName;
+                break;
+            case 'string':
+                layerIndex = effectLayers.findIndex(l => l.nm === indexOrName);
+                layer = effectLayers[layerIndex] || null;
+                break;
+            default:
+                throw new TypeError('Expecting to get layer by <number>"index" or <string>"name". None of those supplied!');
         }
-      }
+
+        return {
+            /** Find the first outer-effect on this layer with the specified name
+             *  @param {string} name
+             */
+            effect: name => {
+                if (!Array.isArray(layer.ef)) {
+                    throw new TypeError(`The ${layer.nm} layer doesn't have effects`);
+                }
+
+                const outerEffectIndex = layer.ef.findIndex(ef => ef.nm === name);
+                const outerEffect = layer.ef[outerEffectIndex];
+
+                return specificName => {
+                    if (!outerEffect) {
+                        return null;
+                    }
+
+                    if (!Array.isArray(outerEffect.ef)) {
+                        throw new TypeError(`The ${outerEffect.name} effect doesn't have child-effects`);
+                    }
+
+                    const effectIndex = outerEffect.ef.findIndex(ef => ef.nm === specificName);
+
+                    return {
+                        ...outerEffect.ef[effectIndex],
+                        parentNm: outerEffect.nm,
+                        path: `layers.${layerIndex}.ef.${outerEffectIndex}.ef.${effectIndex}`
+                    };
+                };
+            }
+        };
     }
-  }
 }
 
 export function findEffectFromJSCode(jsCode, json) {
-  const safeCode = `
+    const safeCode = `
     let thisComp = new Composition(json)
     let window = null;
     let document = null;
     ${jsCode}
 
     return $bm_rt;
-  `
-  // eslint-disable-next-line no-new-func
-  return Function('json', 'Composition', safeCode).bind(null)(json, Composition)
+  `;
+    // eslint-disable-next-line no-new-func
+    return Function('json', 'Composition', safeCode).bind(null)(json, Composition);
 }
 
 export function getNewColors(animationData, startingPath, existingColorPaths = [], isAsset = false) {
-  const result = []
-  const layersOrShapes = deepFind(animationData, startingPath)
+    const result = [];
+    const layersOrShapes = deepFind(animationData, startingPath);
 
-  if (!Array.isArray(layersOrShapes)) {
-    throw new TypeError('Expected an array of layers or shapes')
-  }
-
-  layersOrShapes.forEach((el, layerIndex) => {
-    if (!Array.isArray(el.shapes)) {
-      return
+    if (!Array.isArray(layersOrShapes)) {
+        throw new TypeError('Expected an array of layers or shapes');
     }
 
-    const layerInfo = { name: el.nm, shapes: [] }
-
-    el.shapes.forEach((outerShape, outerShapeIndex) => {
-      const actualShapes = outerShape.it || [outerShape]
-
-      actualShapes.forEach((shape, innerShapeIndex) => {
-        if (shape.ty !== 'fl' && shape.ty !== 'st') {
-          return
+    layersOrShapes.forEach((el, layerIndex) => {
+        if (!Array.isArray(el.shapes)) {
+            return;
         }
 
-        const meta = {
-          name: shape.nm,
-          path: `${startingPath}.${layerIndex}.shapes.${outerShapeIndex}${outerShape.it ? `.it.${innerShapeIndex}` : ''}`,
-          colorValuePath: '.c.k',
-          isAsset
-        }
+        const layerInfo = { name: el.nm, shapes: [] };
 
-        let color = shape.c.k
-        if (shape.c.x) {
-          // Color based on effect
-          const effect = findEffectFromJSCode(shape.c.x, { layers: layersOrShapes })
+        el.shapes.forEach((outerShape, outerShapeIndex) => {
+            const actualShapes = outerShape.it || [outerShape];
 
-          meta.name = effect.parentNm
-          meta.path = effect.path
-          meta.colorValuePath = '.v.k'
-          color = effect.v.k
-        }
+            actualShapes.forEach((shape, innerShapeIndex) => {
+                if (shape.ty !== 'fl' && shape.ty !== 'st') {
+                    return;
+                }
 
-        let [r, g, b] = color.slice(0, 3)
-        if (r <= 1 && g <= 1 && b <= 1) {
-          // Colors are in [0-1] interval
-          [r, g, b] = [r, g, b].map(c => fromUnitVector(c))
-        }
-        const a = color[3]
+                const meta = {
+                    name: shape.nm,
+                    path: `${startingPath}.${layerIndex}.shapes.${outerShapeIndex}${
+                        outerShape.it ? `.it.${innerShapeIndex}` : ''
+                    }`,
+                    colorValuePath: '.c.k',
+                    isAsset
+                };
 
-        meta.rgba = [r, g, b, a]
+                let color = shape.c.k;
+                if (shape.c.x) {
+                    // Color based on effect
+                    const effect = findEffectFromJSCode(shape.c.x, { layers: layersOrShapes });
 
-        if (existingColorPaths.includes(meta.path)) {
-          return
-        }
+                    meta.name = effect.parentNm;
+                    meta.path = effect.path;
+                    meta.colorValuePath = '.v.k';
+                    color = effect.v.k;
+                }
 
-        layerInfo.shapes.push(meta)
-        existingColorPaths.push(meta.path)
-      })
-    })
+                let [r, g, b] = color.slice(0, 3);
+                if (r <= 1 && g <= 1 && b <= 1) {
+                    // Colors are in [0-1] interval
+                    [r, g, b] = [r, g, b].map(c => fromUnitVector(c));
+                }
+                const a = color[3];
 
-    result.push(layerInfo)
-  })
+                meta.rgba = [r, g, b, a];
 
-  return result
-};
+                if (existingColorPaths.includes(meta.path)) {
+                    return;
+                }
+
+                layerInfo.shapes.push(meta);
+                existingColorPaths.push(meta.path);
+            });
+        });
+
+        result.push(layerInfo);
+    });
+
+    return result;
+}
