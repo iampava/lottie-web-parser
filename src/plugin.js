@@ -1,4 +1,4 @@
-import { toUnitVector, getNewColors } from './utils.js';
+import { toUnitVector, getNewColors, findEffectFromJSCode  } from './utils.js';
 
 function hasTextLayers(animationData) {
     if (animationData.chars || animationData.fonts) {
@@ -71,6 +71,7 @@ function parseTexts(json) {
 
 export default {
     hasTextLayers,
+    findEffectFromJSCode,
     parseColors,
     parseTexts,
     replaceColor
