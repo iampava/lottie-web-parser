@@ -65,6 +65,7 @@ function parseTexts(json) {
         .map(l => ({
             name: l.nm,
             text: l.t.d.k[0].s.t,
+            font: l.t.d.k[0].s.f,
             path: `layers.${l.ind - 1}.t.d.k.0.s.t`
         }));
 }
