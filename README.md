@@ -89,6 +89,6 @@ if (LottieWebParser.hasTextLayers(animationData)) {
 
 <hr/>
 
-<p align="center"> Made with ❤ by <a href="https://iampava.com"> Pava for <a href="https://flixier.com">Flixier </a></p>
+<p align="center"> Made with ❤ by <a href="https://iampava.com"> Pava </a> for <a href="https://flixier.com">Flixier </a></p>
 
 PS: special thanks to [sonaye/lottie-editor](https://github.com/sonaye/lottie-editor), whose code was the foundation of this package.
