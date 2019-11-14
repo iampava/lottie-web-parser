@@ -48,6 +48,14 @@ LottieWebParser.hasTextLayers();
 
 Parses the animationData and returns an array of color information, including the name of the shape/layer.
 
+```javascript
+import LottieWebParser from 'lottie-web-parser';
+import animationData from './data.js';
+
+let colorInfo = LottieWebParser.parseColors(animationData);
+console.log(colorInfo);
+```
+
 ### replaceColor(rgba, path, animationData)
 
 Params:
@@ -69,9 +77,18 @@ LottieWebParser.replaceColor([255, 0, 0, 1], colorInfo[0].path, animationData);
 
 Parses the animationData and returns an array of text information.
 
+```javascript
+import LottieWebParser from 'lottie-web-parser';
+import animationData from './data.js';
 
-PS: special thanks to [sonaye/lottie-editor](https://github.com/sonaye/lottie-editor), whose code was the foundation of this package.
+if (LottieWebParser.hasTextLayers(animationData)) {
+    let textInfo = LottieWebParser.parseTexts(animationData);
+    console.log(textInfo);
+}
+```
 
 <hr/>
 
 <p align="center"> Made with ❤ by <a href="https://iampava.com"> Pava for <a href="https://flixier.com">Flixier </a></p>
+
+PS: special thanks to [sonaye/lottie-editor](https://github.com/sonaye/lottie-editor), whose code was the foundation of this package.
