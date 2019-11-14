@@ -8,7 +8,7 @@ Utility functions for parsing color & text information from [lottie-web](https:/
 
 At [Flixier](https://flixier.com) we wanted to build an editor for these lottie animations, so you can customize yours as you please. Demo below:
 
-DEMO
+<img src="https://raw.githubusercontent.com/iampava/lottie-web-parser/master/src/assets/flixier_demo.gif">
 
 The hardest part was understanding the JSON format and parsing/modifying it in such a way that 
 
