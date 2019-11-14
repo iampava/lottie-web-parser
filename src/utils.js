@@ -9,42 +9,93 @@ export function toUnitVector(n) {
     return Math.round((n / 255) * 1000) / 1000;
 }
 
-/**
- * Convert a value from [0,1] ➡ [0,255] interval
- * @param {number} n
- */
-export function fromUnitVector(n) {
-    if (typeof n !== 'number') {
-        throw new TypeError('Expecting a number value!');
-    }
-    return Math.round(n * 255);
+export function findEffectFromJSCode(jsCode, json) {
+    const safeCode = `
+        let thisComp = new Composition(json)
+        let window = null;
+        let document = null;
+        ${jsCode}
+
+        return $bm_rt;
+    `;
+
+    return Function('json', 'Composition', safeCode).bind(null)(json, Composition);
 }
 
 /**
- * Return a value deep inside an object or null if it doesn't exist
- * @param {Object} object
- * @param {string} path
+ * 
+ * @returns { name: string, path: string, type: string, color: Array }
  */
-export function deepFind(object, path) {
-    if (typeof path !== 'string') {
-        throw new TypeError('Expecting "path" to be a string!');
+export function getNewColors(animationData, startingPath, existingColorPaths = []) {
+    const result = [];
+    const layersOrShapes = deepFind(animationData, startingPath);
+
+    if (!Array.isArray(layersOrShapes)) {
+        throw new TypeError('Expected an array of layers or shapes');
     }
 
-    path.split('.').forEach(next => {
-        try {
-            object = object[next];
-        } catch (err) {
-            object = null;
+    layersOrShapes.forEach((el, layerIndex) => {
+        if (!Array.isArray(el.shapes)) {
+            return;
         }
+
+        const layerInfo = { name: el.nm, shapes: [] };
+
+        el.shapes.forEach((outerShape, outerShapeIndex) => {
+            const actualShapes = outerShape.it || [outerShape];
+
+            actualShapes.forEach((shape, innerShapeIndex) => {
+                if (shape.ty !== 'fl' && shape.ty !== 'st') {
+                    return;
+                }
+
+                const meta = {
+                    name: shape.nm,
+                    type: shape.ty,
+                    path: `${startingPath}.${layerIndex}.shapes.${outerShapeIndex}${outerShape.it ? `.it.${innerShapeIndex}` : ''}`
+                };
+
+                let color = shape.c.k;
+                if (shape.c.x) {
+                    // Color based on effect
+                    const effect = findEffectFromJSCode(shape.c.x, {
+                        layers: layersOrShapes
+                    });
+
+                    meta.name = effect.parentNm;
+                    meta.path = effect.path;
+                    color = effect.v.k;
+                }
+
+                let [r, g, b] = color.slice(0, 3);
+                if (r <= 1 && g <= 1 && b <= 1) {
+                    // Colors are in [0-1] interval
+                    [r, g, b] = [r, g, b].map(c => fromUnitVector(c));
+                }
+                const a = color[3];
+
+                meta.rgba = [r, g, b, a];
+
+                if (existingColorPaths.includes(meta.path)) {
+                    return;
+                }
+
+                layerInfo.shapes.push(meta);
+                existingColorPaths.push(meta.path);
+            });
+        });
+
+        result.push(layerInfo);
     });
-    return object;
+
+    return result;
 }
 
 /**
  * Utility class for parsing the JS code in AE Effects. (eg: var $bm_rt;\n$bm_rt = thisComp.layer('color_settings').effect('Fill 3')('Color')')
  * In the example above, 'thisComp' is an instance of the Composition class
  */
-export class Composition {
+class Composition {
     constructor(animationData) {
         try {
             if (typeof animationData === 'string') {
@@ -118,83 +169,35 @@ export class Composition {
     }
 }
 
-export function findEffectFromJSCode(jsCode, json) {
-    const safeCode = `
-    let thisComp = new Composition(json)
-    let window = null;
-    let document = null;
-    ${jsCode}
-
-    return $bm_rt;
-  `;
-    // eslint-disable-next-line no-new-func
-    return Function('json', 'Composition', safeCode).bind(null)(json, Composition);
-}
-
-export function getNewColors(animationData, startingPath, existingColorPaths = [], isAsset = false) {
-    const result = [];
-    const layersOrShapes = deepFind(animationData, startingPath);
-
-    if (!Array.isArray(layersOrShapes)) {
-        throw new TypeError('Expected an array of layers or shapes');
+/**
+ * Return a value deep inside an object or null if it doesn't exist
+ * @param {Object} object
+ * @param {string} path
+ */
+function deepFind(object, path) {
+    if (typeof path !== 'string') {
+        throw new TypeError('Expecting "path" to be a string!');
     }
 
-    layersOrShapes.forEach((el, layerIndex) => {
-        if (!Array.isArray(el.shapes)) {
-            return;
+    const pathParts = path.split('.');
+    for (let next of pathParts) {
+        try {
+            object = object[next];
+        } catch (err) {
+            return null;
         }
+    }
 
-        const layerInfo = { name: el.nm, shapes: [] };
+    return object;
+}
 
-        el.shapes.forEach((outerShape, outerShapeIndex) => {
-            const actualShapes = outerShape.it || [outerShape];
-
-            actualShapes.forEach((shape, innerShapeIndex) => {
-                if (shape.ty !== 'fl' && shape.ty !== 'st') {
-                    return;
-                }
-
-                const meta = {
-                    name: shape.nm,
-                    path: `${startingPath}.${layerIndex}.shapes.${outerShapeIndex}${
-                        outerShape.it ? `.it.${innerShapeIndex}` : ''
-                    }`,
-                    colorValuePath: '.c.k',
-                    isAsset,
-                    type: shape.ty
-                };
-
-                let color = shape.c.k;
-                if (shape.c.x) {
-                    // Color based on effect
-                    const effect = findEffectFromJSCode(shape.c.x, { layers: layersOrShapes });
-
-                    meta.name = effect.parentNm;
-                    meta.path = effect.path;
-                    meta.colorValuePath = '.v.k';
-                    color = effect.v.k;
-                }
-
-                let [r, g, b] = color.slice(0, 3);
-                if (r <= 1 && g <= 1 && b <= 1) {
-                    // Colors are in [0-1] interval
-                    [r, g, b] = [r, g, b].map(c => fromUnitVector(c));
-                }
-                const a = color[3];
-
-                meta.rgba = [r, g, b, a];
-
-                if (existingColorPaths.includes(meta.path)) {
-                    return;
-                }
-
-                layerInfo.shapes.push(meta);
-                existingColorPaths.push(meta.path);
-            });
-        });
-
-        result.push(layerInfo);
-    });
-
-    return result;
+/**
+ * Convert a value from [0,1] ➡ [0,255] interval
+ * @param {number} n
+ */
+function fromUnitVector(n) {
+    if (typeof n !== 'number') {
+        throw new TypeError('Expecting a number value!');
+    }
+    return Math.round(n * 255);
 }

@@ -1,4 +1,4 @@
-import { toUnitVector, getNewColors, findEffectFromJSCode  } from './utils.js';
+import { toUnitVector, getNewColors, findEffectFromJSCode } from './utils.js';
 
 function hasTextLayers(animationData) {
     if (animationData.chars || animationData.fonts) {

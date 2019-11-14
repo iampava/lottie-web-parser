@@ -1,7 +1,7 @@
 {
     "name": "lottie-web-parser",
-    "version": "0.0.10",
-    "description": "Utility functions for modifying color & text information from lottie-web JSONs.",
+    "version": "1.0.0",
+    "description": "Utility functions for parsing color & text information from lottie-web JSONs.",
     "author": {
         "name": "Alexandru Pavaloi",
         "email": "pava@iampava.com",
