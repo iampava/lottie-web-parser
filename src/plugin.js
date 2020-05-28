@@ -60,14 +60,22 @@ function replaceColor(rgba, path, animationData) {
 }
 
 function parseTexts(json) {
+    let fontList = json.fonts.list;
+
     return json.layers
         .filter(l => l.ty === 5)
-        .map(l => ({
-            name: l.nm,
-            text: l.t.d.k[0].s.t,
-            font: l.t.d.k[0].s.f,
-            path: `layers.${l.ind - 1}.t.d.k.0.s.t`
-        }));
+        .map(l => {
+            let fontName = l.t.d.k[0].s.f;
+            let matchedFont = fontList.find(f => f.fName === l.t.d.k[0].s.f);
+
+            return {
+                name: l.nm,
+                text: l.t.d.k[0].s.t,
+                fontName,
+                fontFamily: matchedFont ? matchedFont.fFamily : undefined,
+                path: `layers.${l.ind - 1}.t.d.k.0.s.t`
+            }
+        });
 }
 
 export default {

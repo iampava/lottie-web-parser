@@ -73,7 +73,7 @@ let colorInfo = LottieWebParser.parseColors(animationData);
 LottieWebParser.replaceColor([255, 0, 0, 1], colorInfo[0].path, animationData);
 ```
 
-### parseTexts(animationData) : Array<{name: string, text: string, font: string, path: string}>
+### parseTexts(animationData) : Array<{name: string, text: string, fontFamily: string, fontName: string, path: string}>
 
 Parses the animationData and returns an array of text information.
 
@@ -86,6 +86,18 @@ if (LottieWebParser.hasTextLayers(animationData)) {
     console.log(textInfo);
 }
 ```
+
+```js
+// Example response
+[{
+    name: 't1',
+    text: 'Type something here',
+    fontName: 'Roboto-Black',
+    fontFamily: 'Roboto',
+    path: `layers.2.t.d.k.0.s.t`
+}]
+```
+
 
 <hr/>
 
