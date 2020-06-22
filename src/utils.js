@@ -1,3 +1,21 @@
+export function get(path, object) {
+    if (typeof path !== 'string') {
+        throw new TypeError('Expecting a string value!');
+    }
+
+    let target = object;
+
+    path.split('.').forEach(next => {
+        try {
+            target = target[next];
+        } catch (err) {
+            target = {};
+        }
+    });
+
+    return target
+}
+
 /**
  * Convert a value from [0,255] ➡ [0,1] interval
  * @param {number} n
@@ -8,6 +26,18 @@ export function toUnitVector(n) {
     }
     return Math.round((n / 255) * 1000) / 1000;
 }
+
+/**
+ * Convert a value from [0,1] ➡ [0,255] interval
+ * @param {number} n
+ */
+export function fromUnitVector(n) {
+    if (typeof n !== 'number') {
+        throw new TypeError('Expecting a number value!');
+    }
+    return Math.round(n * 255);
+}
+
 
 export function findEffectFromJSCode(jsCode, json) {
     const safeCode = `
@@ -189,15 +219,4 @@ function deepFind(object, path) {
     }
 
     return object;
-}
-
-/**
- * Convert a value from [0,1] ➡ [0,255] interval
- * @param {number} n
- */
-function fromUnitVector(n) {
-    if (typeof n !== 'number') {
-        throw new TypeError('Expecting a number value!');
-    }
-    return Math.round(n * 255);
 }

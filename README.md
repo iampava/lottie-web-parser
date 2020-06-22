@@ -63,7 +63,11 @@ Params:
 * path: string
 * animationData: JSON object
 
-Modifies the animationData in place, by replacing the color value found at that path.
+Modifies the animationData in place, by replacing the color value found at that path after it adjusts the values:
+
+
+* if the current color values are in `[0-1]` then it will normalize to this interval
+* otherwise it will use the real values
 
 ```javascript
 import LottieWebParser from 'lottie-web-parser';
@@ -72,6 +76,31 @@ import animationData from './data.js';
 let colorInfo = LottieWebParser.parseColors(animationData);
 LottieWebParser.replaceColor([255, 0, 0, 1], colorInfo[0].path, animationData);
 ```
+
+### replaceKeyframeColor(rgba, path, animationData)
+
+Params:
+* rgba: Array<number>
+* path: string
+* animationData: JSON object
+
+Modifies the animation data in place, by replacing the value found at that path. Similar to `replaceColor` above, it adjusts the values.
+
+```javascript
+import LottieWebParser from 'lottie-web-parser';
+import animationData from './data.js';
+
+let path = 'layers.5.shapes.2.c.k.0';
+LottieWebParser.replaceColor([255, 0, 0, 1], path, animationData);
+```
+
+### getKeyframeColors(path, animationData)
+
+Params:
+* path: string
+* animationData: JSON object
+
+Returns the color values at `path`. If the values are in `[0, 1]` interval it will adjust them to the RGB interval `[0-255]`.
 
 ### parseTexts(animationData) : Array<{name: string, text: string, fontFamily: string, fontName: string, path: string}>
 

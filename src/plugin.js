@@ -1,4 +1,4 @@
-import { toUnitVector, getNewColors, findEffectFromJSCode } from './utils.js';
+import { get, toUnitVector, fromUnitVector, getNewColors, findEffectFromJSCode, } from './utils.js';
 
 function hasTextLayers(animationData) {
     if (animationData.chars || animationData.fonts) {
@@ -29,16 +29,8 @@ function replaceColor(rgba, path, animationData) {
     if (typeof animationData !== 'object') {
         throw new Error('Expecting a JSON-based format animation data');
     }
-    const [r, g, b, a] = [...rgba];
-    let target = animationData;
-
-    path.split('.').forEach(next => {
-        try {
-            target = target[next];
-        } catch (err) {
-            target = {};
-        }
-    });
+    const [r, g, b, a] = rgba;
+    const target = get(path, animationData);
 
     if (target.v && target.v.k) {
         // Effect
@@ -57,6 +49,36 @@ function replaceColor(rgba, path, animationData) {
     }
 
     return animationData;
+}
+
+function replaceKeyframeColor(rgba, path, animationData) {
+    if (typeof animationData !== 'object') {
+        throw new Error('Expecting a JSON-based format animation data');
+    }
+    const [r, g, b, a] = rgba;
+    const target = get(path, animationData);
+
+    if (target && target.s) {
+        if (target.s.every(value => value <= 1)) {
+            target.s = [toUnitVector(r), toUnitVector(g), toUnitVector(b), a];
+        } else {
+            target.s = [r, g, b, a];
+        }
+
+    }
+}
+
+function getKeyframeColors(path, animationData) {
+    const target = get(path, animationData);
+
+    if (target && target.c.k && target.c.k.every(value => typeof value !== 'number')) {
+        const keyframeValues = target.c.k.map(value => value.s)
+        return keyframeValues.map(value => {
+            const isUnitFormat = value.every(v => v <= 1);
+
+            return isUnitFormat ? value.map(fromUnitVector) : value
+        })
+    }
 }
 
 function parseTexts(json) {
@@ -83,5 +105,7 @@ export default {
     findEffectFromJSCode,
     parseColors,
     parseTexts,
-    replaceColor
+    replaceColor,
+    replaceKeyframeColor,
+    getKeyframeColors
 };
